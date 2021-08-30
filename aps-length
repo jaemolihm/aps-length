@@ -337,11 +337,20 @@ def count_main_text_words_wordcount(tex_lines, opts):
     wordcount = len([line for line in wordcount_log if '3.08633' in line or '3.08635' in line])
     return wordcount
 
+def check_is_equation_line(line):
+    is_equation = (r'\begin{equation' in line or
+                   r'\begin{eqnarray' in line or
+                   r'\begin{align' in line or
+                   r'\begin{displaymath' in line)
+    if len(line.strip()) > 0 and '%' == line.strip()[0]:
+        is_equation = False
+    return is_equation
+
 def find_equation_lines(tex_lines):
-    return [i for (i, line) in enumerate(tex_lines) if (r'\begin{equation' in line or
-                                                        r'\begin{eqnarray' in line or
-                                                        r'\begin{align' in line or
-                                                        r'\begin{displaymath' in line)]
+    equation_lines = [i for (i, line) in enumerate(tex_lines)
+      if check_is_equation_line(line)]
+    return equation_lines
+
 def count_equation_words(lines, start_line):
     count = 1
     array = False
