@@ -388,6 +388,7 @@ def count_equations_words(tex_lines):
     eqn_words = [count_equation_words(tex_lines, eqn_line_no) for eqn_line_no in eqn_line_nos]
     print("Number of equations: ", len(eqn_words))
     print('Equations: %r' % eqn_words)
+    print()
     return sum(eqn_words)
 
 def find_table_lines(tex_lines):
@@ -442,8 +443,6 @@ def count_figures_words(detex_lines, tex_lines, opts):
         subfig = 'subfloat' in tex_lines[inc_fig_line_no]
         newline = r'\\' in tex_lines[inc_fig_line_no]
 
-        print(filename, tex_lines[inc_fig_line_no], tex_lines[fig_line_no])
-
         for key in tex_vars.keys():
             if key in filename:
                 filename = filename.replace(key, tex_vars[key])
@@ -491,6 +490,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
                                                                       width, height,
                                                                       aspect, filename))
         fig_words.append(words_equiv)
+    print()
 
     return int(sum(fig_words)*opts.scale_figs)
 
