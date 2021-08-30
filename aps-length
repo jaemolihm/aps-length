@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Count length of an APS manuscript formatted in LaTeX, following
@@ -328,7 +328,7 @@ def count_main_text_words_wordcount(tex_lines, opts):
     os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
     os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
     os.system(r'echo tmp_tex_file.tex | %s wordcount.tex > /dev/null 2>&1' % opts.latex)
-    wordcount_log = open('wordcount.log').readlines()
+    wordcount_log = open('wordcount.log', "r", encoding='iso-8859-1').readlines()
 
     rm_files = glob.glob('wordcount*') + glob.glob('tmp_tex_file*')
     for file in rm_files:
@@ -377,7 +377,8 @@ def count_equation_words(lines, start_line):
 def count_equations_words(tex_lines):
     eqn_line_nos = find_equation_lines(tex_lines)
     eqn_words = [count_equation_words(tex_lines, eqn_line_no) for eqn_line_no in eqn_line_nos]
-    print 'Equations: %r' % eqn_words
+    print("Number of equations: ", len(eqn_words))
+    print('Equations: %r' % eqn_words)
     return sum(eqn_words)
 
 def find_table_lines(tex_lines):
@@ -392,16 +393,16 @@ def count_table_words(tex_lines, table_line):
         if r'\\' in line:
             count += 1
     if two_column:
-        print 'Two-column table with %d lines' % count
+        print('Two-column table with %d lines' % count)
         return int(13.*count + 26.)
     else:
-        print 'Single-column table with %d lines' % count
+        print('Single-column table with %d lines' % count)
         return int(6.5*count + 13.)
 
 def count_tables_words(tex_lines):
     table_lines = find_table_lines(tex_lines)
     table_words = [ count_table_words(tex_lines, table_line) for table_line in table_lines ]
-    print 'Tables: %r' % table_words
+    print('Tables: %r' % table_words)
     return sum(table_words)
 
 
@@ -432,7 +433,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
         subfig = 'subfloat' in tex_lines[inc_fig_line_no]
         newline = r'\\' in tex_lines[inc_fig_line_no]
 
-        print filename, tex_lines[inc_fig_line_no], tex_lines[fig_line_no]
+        print(filename, tex_lines[inc_fig_line_no], tex_lines[fig_line_no])
 
         for key in tex_vars.keys():
             if key in filename:
@@ -450,7 +451,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
                                         stdout=subprocess.PIPE)
             out, err = identify.communicate()
             fields = out.split()
-            width, height = fields[2].split('x')
+            width, height = fields[2].decode().split('x')
             width = float(width)
             height = float(height)
         elif opts.figs == 'gs':
@@ -477,39 +478,39 @@ def count_figures_words(detex_lines, tex_lines, opts):
         else:
             words_equiv = 150./aspect + 20.
 
-        print 'Figure %d:   %6d words (%.0fx%.0f aspect %.2f, %s)' % (fig_i+1, int(words_equiv),
+        print('Figure %d:   %6d words (%.0fx%.0f aspect %.2f, %s)' % (fig_i+1, int(words_equiv),
                                                                       width, height,
-                                                                      aspect, filename)
+                                                                      aspect, filename))
         fig_words.append(words_equiv)
 
     return int(sum(fig_words)*opts.scale_figs)
 
 
 def count_chars_abstract(tex_lines):
-    abs_begin_line, = [i for (i,line) in enumerate(tex_lines) if r'\begin{abstract}' in line]
-    abs_end_line, = [i for (i,line) in enumerate(tex_lines) if r'\end{abstract}' in line]
+    abs_begin_line, = [i for (i,line) in enumerate(tex_lines) if r'\begin{abstract}' in line or r'\begin{sciabstract}' in line]
+    abs_end_line, = [i for (i,line) in enumerate(tex_lines) if r'\end{abstract}' in line or r'\end{sciabstract}' in line]
 
     abstract_lines = tex_lines[abs_begin_line+1:abs_end_line]
     abstract_lines = [line for line in abstract_lines if not line.startswith('%') ]
     abstract = ''.join(abstract_lines)
-    print 'ABSTRACT:'
-    print abstract
+    print('ABSTRACT:')
+    print(abstract)
     return len(abstract)
 
 
 def process(tex_file, opts):
-    print 'Processing TeX file: %s\n' % tex_file
+    print('Processing TeX file: %s\n' % tex_file)
     detex = subprocess.Popen(['detex', '-e', opts.env, tex_file],
                              stdout=subprocess.PIPE)
     out, err = detex.communicate()
-    detex_lines = out.strip().split('\n')
+    detex_lines = out.decode().strip().split('\n')
 
     tex_lines = open(tex_file).readlines()
 
     abstract_chars = count_chars_abstract(tex_lines)
-    print
-    print 'Abstract:    %6d chars (max 600)' % abstract_chars
-    print
+    print()
+    print('Abstract:    %6d chars (max 600)' % abstract_chars)
+    print()
 
     if opts.method == 'detex':
         main_text_words = count_main_text_words_detex(detex_lines, tex_lines)
@@ -522,13 +523,13 @@ def process(tex_file, opts):
     table_words = count_tables_words(tex_lines)
     total_words = (main_text_words + eqn_words + fig_words + table_words)
 
-    print
-    print 'Main text:      %6d words' % main_text_words
-    print 'Displayed Math: %6d words' % eqn_words
-    print 'Figures:        %6d words' % fig_words
-    print 'Tables:         %6d words' % table_words
-    print 'TOTAL:          %6d words' % total_words
-    print
+    print()
+    print('Main text:      %6d words' % main_text_words)
+    print('Displayed Math: %6d words' % eqn_words)
+    print('Figures:        %6d words' % fig_words)
+    print('Tables:         %6d words' % table_words)
+    print('TOTAL:          %6d words' % total_words)
+    print()
     wl = word_limit[opts.journal]
     if total_words > wl:
         over_under = 'OVER'
