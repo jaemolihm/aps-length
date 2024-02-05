@@ -423,7 +423,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
         tex_vars = dict(opts.var)
 
     # fig_lines = [line for line in detex_lines if '<Picture' in line ]
-    fig_lines = [line for line in tex_lines if 'includegraphics' in line ]
+    fig_lines = [line for line in tex_lines if ('includegraphics' in line and line.strip()[0] != "%")]
     fig_words = []
     #figs = {}
 
