@@ -323,6 +323,8 @@ def count_main_text_words_wordcount(tex_lines, opts):
     wordcount_tex_file.write(wordcount_tex_contents)
     wordcount_tex_file.close()
 
+    print("Compiling tmp_tex_file...")
+    print("If the code is stuck here, kill and try running 'pdflatex tmp_tex_file'", flush=True)
     os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
     os.system('bibtex tmp_tex_file > /dev/null 2>&1')
     os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
